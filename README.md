@@ -44,7 +44,7 @@ yarn build
 ## Данные и типы данных, используемые в приложении
 Корзина 
 
-'''
+```
 
 export interface IBasketModel {
     items: Map<string, number>
@@ -52,11 +52,11 @@ export interface IBasketModel {
     remove(id: string): void
 }
 
-'''
+```
 
 Продукт 
 
-'''
+```
 interface IProduct {
     id: string
     title: string
@@ -65,20 +65,20 @@ interface IProduct {
     image: string
 }
 
-'''
+```
 Каталог товаров
 
-'''
+```
 interface ICatalogModel {
     items: IProduct[]
     setItems(items: IProduct[]): void
     getProduct(id: string): IProduct
 }
 
-'''
+```
 Форма 
 
-'''
+```
 interface IFormModel {
     payment: string
     address: string
@@ -86,7 +86,7 @@ interface IFormModel {
     phone: number
 }
 
-'''
+```
 
 ## Архитектура приложения
 
