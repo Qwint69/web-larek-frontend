@@ -4,11 +4,27 @@ export interface IProduct {
     description: string
     price: number
     image: string
+    category: string
 }
+
+export interface ProductSelectEvent{
+    item: IProduct
+}
+
+export interface IProductResponse{
+    total: number
+    items: IProduct[]
+}
+
 export interface IBasketModel {
     items: Map<string, number>
     add(id: string): void
     remove(id: string): void
+}
+
+export interface IBasketResponse {
+    id: string
+    total: number
 }
 
 export interface ICatalogModel {
@@ -17,15 +33,23 @@ export interface ICatalogModel {
     getProduct(id: string): IProduct | undefined
 }
 
-export interface IFormModel {
+export interface CatalogChangeEvent{
+    items: IProduct[]
+}
+
+export interface IFormData {
     payment: string
     address: string
     email: string
     phone: string
+}
 
-    setFirstForm(payment: string, address: string): void
-    setSecondForm(email:string, phone: string): void
-    isCurrentForm(formNumber: number): boolean
-    checkFirstFormValidation(): boolean
-    checkSecondFormValidation(): boolean
+export type IFormErrors = Partial<Record<keyof IFormData, string>>
+    
+export interface IFormModel {
+    form: IFormData
+    formErrors: IFormErrors
+
+    setField(field: keyof IFormData, value: string): void
+    validateForm(): boolean
 }

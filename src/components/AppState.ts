@@ -1,28 +1,44 @@
-import { IBasketModel, ICatalogModel, IFormModel, IProduct } from "../types";
+import { IBasketModel, ICatalogModel, IFormData, IFormErrors, IFormModel, IProduct } from "../types";
+import { Model } from "./base/Model";
 
 
-export class BasketModel implements IBasketModel {
-    items: Map<string, number> = new Map()
+export class BasketModel extends Model<IBasketModel> {
+    items: Map<string, IProduct> = new Map()
 
 
-    add(id: string): void {
-        if (!this.items.has(id)) this.items.set(id, 0)
-        this.items.set(id, this.items.get(id)! + 1)
+    add(product: IProduct): IProduct[] {
+        this.items.set(product.id, product)
+        return this.getItems()
     }
-    remove(id: string): void {
-        if (!this.items.has(id)) return
-        if (this.items.get(id)! > 0) {
-            this.items.set(id, this.items.get(id)! - 1)
-            if (this.items.get(id) === 0) this.items.delete(id)
-        }
+    remove(product: IProduct): IProduct[] {
+        if (!this.items.has(product.id)) return this.getItems()
+        this.items.delete(product.id)
+        return this.getItems()
+    }
+
+    hasProduct(product: IProduct): boolean {
+        return this.items.has(product.id)
+    }
+
+    getItems(): IProduct[] {
+        return Array.from(this.items.values())
+    }
+
+    countTotal(): number {
+        return this.getItems().reduce((acc: number, curr: IProduct) => acc + curr.price, 0)
+    }
+
+    initBasket(): void {
+        this.items = new Map()
     }
 }
 
-export class CatalogModel implements ICatalogModel {
+export class CatalogModel extends Model<ICatalogModel> {
     items: IProduct[] = []
 
     setItems(items: IProduct[]): void {
         this.items = items
+        this.emitChanges('catalog:changed', { items: this.items })
     }
 
     getProduct(id: string): IProduct | undefined {
@@ -30,32 +46,55 @@ export class CatalogModel implements ICatalogModel {
     }
 }
 
-export class FormModel implements IFormModel {
-    payment: string = ''
-    address: string = ''
-    email: string = ''
-    phone: string = ''
+export class FormModel extends Model<IFormModel> {
+    form = {
+        payment: '',
+        address: '',
+        email: '',
+        phone: '',
+    }
+    formErrors: IFormErrors
 
-    setFirstForm(payment: string, address: string): void {
-        this.payment = payment
-        this.address = address
+    setField(field: keyof IFormData, value: string): void {
+        this.form[field] = value;
     }
 
-    setSecondForm(email:string, phone: string): void {
-        this.email = email
-        this.phone = phone
+    validateFirstForm(): boolean {
+        const errors: typeof this.formErrors = {};
+        
+        if (!this.form.payment) {
+            errors.payment = 'Необходимо указать способ оплаты';
+        }
+        if (!this.form.address) {
+            errors.address = 'Необходимо указать адрес';
+        }
+        this.formErrors = errors;
+        this.events.emit('formErrors:change', this.formErrors);
+        return Object.keys(errors).length === 0;
     }
 
-    isCurrentForm(formNumber: number): boolean {
-        const currentForm = this.payment && this.address? 2:1
-        return currentForm === formNumber
+    validateSecondForm(): boolean {
+        const errors: typeof this.formErrors = {}
+
+        if (!this.form.email) {
+            errors.email = 'Необходимо указать email';
+        }
+        if (!this.form.phone) {
+            errors.phone = 'Необходимо указать телефон';
+        }
+        this.formErrors = errors;
+        this.events.emit('formErrors:change', this.formErrors);
+        return Object.keys(errors).length === 0;
     }
 
-    checkFirstFormValidation(): boolean {
-        return !!this.payment && !!this.address 
-    }
-
-    checkSecondFormValidation(): boolean {
-        return !!this.email && !!this.phone
+    initForm(): void {
+        this.formErrors = {}
+        this.form = {
+            payment: '',
+            address: '',
+            email: '',
+            phone: '',
+        }
     }
 }
+
