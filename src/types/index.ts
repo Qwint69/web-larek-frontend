@@ -2,7 +2,7 @@ export interface IProduct {
     id: string
     title: string
     description: string
-    price: number
+    price?: number
     image: string
     category: string
 }
