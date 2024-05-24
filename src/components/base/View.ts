@@ -1,7 +1,7 @@
 
 export abstract class View<T> {
     protected constructor(protected readonly container: HTMLElement) {
-        
+
     }
 
     toggleClass(element: HTMLElement, className: string, force?: boolean) {
@@ -16,8 +16,13 @@ export abstract class View<T> {
 
     setDisabled(element: HTMLElement, state: boolean) {
         if (element) {
-            if (state) element.setAttribute('disabled', 'disabled');
-            else element.removeAttribute('disabled');
+            if (state) {
+                element.removeAttribute('enabled')
+                element.setAttribute('disabled', 'disabled')
+            }
+            else { 
+                element.removeAttribute('disabled') 
+            }
         }
     }
 
