@@ -1,4 +1,5 @@
 # Проектная работа "Веб-ларек"
+https://github.com/Qwint69/web-larek-frontend
 
 Стек: HTML, SCSS, TS, Webpack
 
