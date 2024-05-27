@@ -13,6 +13,14 @@ interface IProductCard {
     category: string
 }
 
+const categoryToClassName: Record<string, string> = {
+    'софт-скил': '_soft',
+    'хард-скил': '_hard',
+    'другое': '_other',
+    'дополнительное': '_additional',
+    'кнопка': '_button'
+}
+
 export class ProductCard extends View<IProductCard> {
     protected _title: HTMLElement
     protected _description?: HTMLElement
@@ -28,7 +36,8 @@ export class ProductCard extends View<IProductCard> {
         this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
         this._button = container.querySelector(`.${blockName}__button`);
         this._description = container.querySelector(`.${blockName}__text`);
-        this._category = ensureElement<HTMLElement>(`.${blockName}__category`, container)
+        this._category = container.querySelector(`.${blockName}__category`)
+        this._price = ensureElement<HTMLElement>(`.${blockName}__price`, container)
 
         if (actions?.onClick) {
             if (this._button) {
@@ -70,4 +79,19 @@ export class ProductCard extends View<IProductCard> {
             this.setText(this._description, value);
         }
     }
+
+    set category(value: string) {
+        this.setText(this._category, value)
+        this._category.classList.add('card__category' + categoryToClassName[value])
+
+    }
+
+    get category(): string {
+        return this._category.textContent || ''
+    }
+
+    set price(value: number) {
+        this.setText(this._price, value)
+    }
 }
+

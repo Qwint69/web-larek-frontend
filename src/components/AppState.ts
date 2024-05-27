@@ -10,6 +10,7 @@ export class BasketModel extends Model<IBasketModel> {
         this.items.set(product.id, product)
         return this.getItems()
     }
+
     remove(product: IProduct): IProduct[] {
         if (!this.items.has(product.id)) return this.getItems()
         this.items.delete(product.id)
@@ -30,6 +31,13 @@ export class BasketModel extends Model<IBasketModel> {
 
     initBasket(): void {
         this.items = new Map()
+    }
+
+    getSummary(): {total: number, items: string[]} {
+        return {
+            items: this.getItems().map((i) => i.id),
+            total: this.countTotal()
+        }
     }
 }
 
@@ -61,7 +69,7 @@ export class FormModel extends Model<IFormModel> {
 
     validateFirstForm(): boolean {
         const errors: typeof this.formErrors = {};
-        
+
         if (!this.form.payment) {
             errors.payment = 'Необходимо указать способ оплаты';
         }
@@ -95,6 +103,10 @@ export class FormModel extends Model<IFormModel> {
             email: '',
             phone: '',
         }
+    }
+
+    getForm(): IFormData {
+        return this.form
     }
 }
 

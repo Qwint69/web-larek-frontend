@@ -8,6 +8,7 @@ interface IBasketCardActions {
 
 interface IBasketView {
     items: HTMLElement[]
+    price: HTMLElement
 }
 
 interface IBasketItemView {
@@ -19,12 +20,14 @@ interface IBasketItemView {
 export class BasketView extends View<IBasketView> {
     protected _items: HTMLElement
     protected _checkout: HTMLButtonElement
+    protected _price: HTMLElement
 
     constructor(container: HTMLElement, protected events: IEvents, actions?: IBasketCardActions) {
         super(container)
 
         this._items = ensureElement<HTMLElement>('.basket__list', container)
         this._checkout = ensureElement<HTMLButtonElement>('.basket__button', container)
+        this._price = ensureElement<HTMLElement>('.basket__price', container)
 
         if (actions?.onClick) {
             if (this._checkout) {
@@ -37,6 +40,14 @@ export class BasketView extends View<IBasketView> {
 
     set items(items: HTMLElement[]) {
         this._items.replaceChildren(...items)
+    }
+
+    set price(value: number) {
+        this.setText(this._price, value)
+    }
+
+    toogleButtonDiasable(isDisabled: boolean) {
+        this.setDisabled(this._checkout, isDisabled)
     }
 }
 

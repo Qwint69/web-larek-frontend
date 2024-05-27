@@ -34,18 +34,26 @@ const formData = new FormModel({}, events)
 //Глобальные контейнеры
 const page = new Page(document.body, events)
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events)
-const firstForm = new FirstForm(cloneTemplate(order), events, {onSubmit: () => {
-    events.emit('form:proceed')
-}})
-const secondForm = new SecondForm(cloneTemplate(contacts), events, {onSubmit: () => {
-    events.emit('form:submit')
-}})
-const successModal = new Success(cloneTemplate(success), events, {onClick: () => {
-    modal.close()
-}})
-const basketElement = new BasketView(cloneTemplate(basket), events, {onClick: () => {
-    events.emit('product:checkout')
-}})
+const firstForm = new FirstForm(cloneTemplate(order), events, {
+    onSubmit: () => {
+        events.emit('form:proceed')
+    }
+})
+const secondForm = new SecondForm(cloneTemplate(contacts), events, {
+    onSubmit: () => {
+        events.emit('form:submit')
+    }
+})
+const successModal = new Success(cloneTemplate(success), events, {
+    onClick: () => {
+        modal.close()
+    }
+})
+const basketElement = new BasketView(cloneTemplate(basket), events, {
+    onClick: () => {
+        events.emit('product:checkout')
+    }
+})
 
 //Бизнес логика
 events.on<CatalogChangeEvent>('catalog:changed', () => {
@@ -65,16 +73,18 @@ events.on<CatalogChangeEvent>('catalog:changed', () => {
 
 events.on<IProduct>('product:select', (i: IProduct) => {
     const card = new ProductCard('card', cloneTemplate(cardPreview), {
-        onClick: () => 
+        onClick: () =>
             events.emit('product:add', i)
     })
-    modal.render({content: card.render({
-        title: i.title,
-        description: i.description,
-        image: i.image,
-        price: i.price,
-        category: i.category
-    })})
+    modal.render({
+        content: card.render({
+            title: i.title,
+            description: i.description,
+            image: i.image,
+            price: i.price,
+            category: i.category
+        })
+    })
 
 })
 
@@ -87,11 +97,13 @@ events.on('modal:close', () => {
 })
 
 const renderBasket = (products: IProduct[]) => {
-    
+
     const basketProductsElements = products.map((p, index) => {
-        const basketProductElement = new BasketItemView(cloneTemplate(cardBasket), events, {onClick:() => {
-            events.emit('product:delete', p)
-        }})
+        const basketProductElement = new BasketItemView(cloneTemplate(cardBasket), events, {
+            onClick: () => {
+                events.emit('product:delete', p)
+            }
+        })
         return basketProductElement.render({
             index: index + 1,
             title: p.title,
@@ -99,6 +111,8 @@ const renderBasket = (products: IProduct[]) => {
         })
     })
     basketElement.items = basketProductsElements
+    basketElement.price = basketData.countTotal()
+    basketElement.toogleButtonDiasable(!products.length)
     modal.render({
         content: basketElement.render()
     })
@@ -118,60 +132,68 @@ events.on('basket:open', () => {
 
 events.on<IProduct>('product:delete', (i: IProduct) => {
     const basketProducts = basketData.remove(i)
+
     renderBasket(basketProducts)
+
 })
 
 events.on('product:checkout', () => {
-    
-    modal.render({
-        content: firstForm.render({
-            address: '',
-            payment: '',
-            errors: [],
-            valid: true
+     
+        modal.render({
+            content: firstForm.render({
+                address: '',
+                payment: '',
+                errors: [],
+                valid: true
+            })
         })
-    })
 })
 
 events.on('form:proceed', () => {
-    
-    if (formData.validateFirstForm())
-    {modal.render({
-        content: secondForm.render({
-            email: '',
-            phone: '',
-            errors: [],
-            valid: true
+
+    if (formData.validateFirstForm()) {
+        modal.render({
+            content: secondForm.render({
+                email: '',
+                phone: '',
+                errors: [],
+                valid: true
+            })
         })
-    })}
+    }
 })
 
 events.on('form:submit', () => {
-    
+
     if (formData.validateSecondForm()) {
-        modal.render({
-            content: successModal.render({
-                description: `Списано ${basketData.countTotal()} синапсов`
+        api.postOrder({ ...formData.getForm(), ...basketData.getSummary() })
+            .then(() => {
+                modal.render({
+                    content: successModal.render({
+                        description: `Списано ${basketData.countTotal()} синапсов`
+                    })
+                })
+                basketData.initBasket()
+                formData.initForm()
+                page.counter = 0
+                basketElement.items = []
             })
-        })
-        basketData.initBasket()
-        formData.initForm()
-        page.counter = 0
-        basketElement.items = []
-        
+            .catch((err) => console.error(err))
     }
 })
 
 events.on('formErrors:change', (errors: Partial<IFormData>) => {
     const { email, phone, address, payment } = errors;
     firstForm.valid = !address && !payment
-    firstForm.errors = Object.values({address, payment}).filter(i => !!i).join('; ')
+    firstForm.errors = Object.values({ address, payment }).filter(i => !!i).join('; ')
     secondForm.valid = !email && !phone
-    secondForm.errors = Object.values({email, phone}).filter(i => !!i).join('; ')
+    secondForm.errors = Object.values({ email, phone }).filter(i => !!i).join('; ')
 });
 
 events.on(/^order\..*:change/, (data: { field: keyof IFormData, value: string }) => {
     formData.setField(data.field, data.value);
 });
 
-api.getProducts().then((response: IProductResponse) => catalogData.setItems.bind(catalogData)(response.items))
+api.getProducts()
+    .then((response: IProductResponse) => catalogData.setItems.bind(catalogData)(response.items))
+    .catch(err => console.error(err))

@@ -1,10 +1,10 @@
 import { Api, ApiListResponse } from "./base/api";
-import { IProduct, IBasketModel, IBasketResponse, IProductResponse } from "../types";
+import { IProduct, IBasketModel, IBasketResponse, IProductResponse, IFormData } from "../types";
 
 interface IShopApi {
     getProducts: () => Promise<IProductResponse>
     getProduct: (id: string) => Promise<IProduct>
-    postOrder: (order: IBasketModel) => Promise<IBasketResponse>
+    postOrder: (order: IFormData) => Promise<IBasketResponse>
 }
 
 export class ShopApi extends Api implements IShopApi {
@@ -31,7 +31,7 @@ export class ShopApi extends Api implements IShopApi {
         return this.get('/product/' + id).then((product: IProduct) => ({ ...product, image: this.cdn + product.image }))
     }
 
-    postOrder(order: IBasketModel) {
+    postOrder(order: IFormData) {
         return this.post('/order', order).then((data: IBasketResponse) => data)
     }
 }

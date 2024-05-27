@@ -49,8 +49,14 @@ yarn build
 
 export interface IBasketModel {
     items: Map<string, number>
+
     add(id: string): void
     remove(id: string): void
+    hasProduct(product: IProduct): boolean
+    getItems(): IProduct[]
+    countTotal(): number
+    initBasket(): void
+    getSummary(): { total: number, items: string[] }
 }
 
 ```
@@ -121,7 +127,10 @@ export interface IFormModel {
     formErrors: IFormErrors
 
     setField(field: keyof IFormData, value: string): void
-    validateForm(): boolean
+    validateFirstForm(): boolean
+    validateSecondForm(): boolean
+    initForm(): void
+    getForm(): IFormData
 }
 
 ```
@@ -197,6 +206,7 @@ export type IFormErrors = Partial<Record<keyof IFormData, string>>
 - getItems(): IProduct[] - получает массив из товаров
 - countTotal(): number - считает общее количество товаров в корзине
 - initBasket(): void - обнуляет корзину
+- getSummary(): {total: number, items: string[]} - дает общую информацию о содержимом корзины
 
 #### Класс CatalogtModel
 Представляет собой состояние каталога товаров на сайте.
@@ -223,6 +233,7 @@ export type IFormErrors = Partial<Record<keyof IFormData, string>>
 - validateFirstForm(): boolean - валидирует первую форму
 - validateSecondForm(): boolean - валидирует вторую форму
 - initForm(): void - очищает поля формы
+- getForm(): IFormData - собирает все данные из форм
 
 ### Слой представления
 
