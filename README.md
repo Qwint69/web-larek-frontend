@@ -265,6 +265,8 @@ export type IFormErrors = Partial<Record<keyof IFormData, string>>
 Поля:
 - items: HTMLElement[] - список товаров в корзине
 
+Методы:
+- toogleButtonDiasable(isDisabled: boolean) - отключает кнопку 'оформить'
 
 #### Класс BasketItemView
 Отображение товаров в открытом модальном окне корзины

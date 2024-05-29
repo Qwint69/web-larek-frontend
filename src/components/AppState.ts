@@ -6,7 +6,7 @@ export class BasketModel extends Model<IBasketModel> {
     items: Map<string, IProduct> = new Map()
 
 
-    add(product: IProduct): IProduct[] {
+    add(product: IProduct): IProduct[] { 
         this.items.set(product.id, product)
         return this.getItems()
     }

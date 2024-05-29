@@ -1,3 +1,4 @@
+
 import { ensureElement } from "../utils/utils"
 import { View } from "./base/View"
 
@@ -11,6 +12,7 @@ interface IProductCard {
     image: string
     price: number
     category: string
+    isInBasket: boolean
 }
 
 const categoryToClassName: Record<string, string> = {
@@ -27,7 +29,7 @@ export class ProductCard extends View<IProductCard> {
     protected _image: HTMLImageElement
     protected _price: HTMLElement
     protected _category: HTMLElement
-    protected _button: HTMLElement
+    protected _button: HTMLButtonElement
 
     constructor(protected blockName: string, container: HTMLElement, actions?: IProductCardAction) {
         super(container);
@@ -91,7 +93,13 @@ export class ProductCard extends View<IProductCard> {
     }
 
     set price(value: number) {
-        this.setText(this._price, value)
+        this.setText(this._price, value === null ? '0 - товар не продается' : value)
+        if (value === null) this.setDisabled(this._button, true)
     }
+
+    set isInBasket(state: boolean) {
+        this.setText(this._button, state ? 'Перейти в корзину' : 'В корзину')
+    }
+
 }
 

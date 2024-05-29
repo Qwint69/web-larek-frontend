@@ -74,6 +74,14 @@ export class BasketItemView extends View<IBasketItemView> {
         }
     }
 
+    set id(value: string) {
+        this.container.dataset.id = value;
+    }
+
+    get id(): string {
+        return this.container.dataset.id || '';
+    }
+
     set index(value: number) {
         this.setText(this._index, value)
     }

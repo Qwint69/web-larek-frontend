@@ -1,5 +1,5 @@
 import './scss/styles.scss';
-import { cloneTemplate, ensureElement } from './utils/utils';
+import { cloneTemplate, ensureElement, isEmpty } from './utils/utils';
 import { BasketModel, FormModel, CatalogModel } from './components/AppState';
 import { EventEmitter } from './components/base/events';
 import { Api } from './components/base/api';
@@ -55,46 +55,7 @@ const basketElement = new BasketView(cloneTemplate(basket), events, {
     }
 })
 
-//Бизнес логика
-events.on<CatalogChangeEvent>('catalog:changed', () => {
-    page.catalog = catalogData.items.map((i) => {
-        const card = new ProductCard('card', cloneTemplate(cardCatalog), {
-            onClick: () => events.emit('product:select', i)
-        })
-        return card.render({
-            title: i.title,
-            description: i.description,
-            image: i.image,
-            price: i.price,
-            category: i.category
-        })
-    })
-})
-
-events.on<IProduct>('product:select', (i: IProduct) => {
-    const card = new ProductCard('card', cloneTemplate(cardPreview), {
-        onClick: () =>
-            events.emit('product:add', i)
-    })
-    modal.render({
-        content: card.render({
-            title: i.title,
-            description: i.description,
-            image: i.image,
-            price: i.price,
-            category: i.category
-        })
-    })
-
-})
-
-events.on('modal:open', () => {
-    page.locked = true
-})
-
-events.on('modal:close', () => {
-    page.locked = false
-})
+//Переиспользуемые компоненты
 
 const renderBasket = (products: IProduct[]) => {
 
@@ -120,6 +81,49 @@ const renderBasket = (products: IProduct[]) => {
     page.counter = basketData.getItems().length
 }
 
+//Бизнес логика
+events.on<CatalogChangeEvent>('catalog:changed', () => {
+    page.catalog = catalogData.items.map((i) => {
+        const card = new ProductCard('card', cloneTemplate(cardCatalog), {
+            onClick: () => events.emit('product:select', i)
+        })
+        return card.render({
+            title: i.title,
+            description: i.description,
+            image: i.image,
+            price: i.price,
+            category: i.category
+        })
+    })
+})
+
+events.on<IProduct>('product:select', (i: IProduct) => {
+    const card = new ProductCard('card', cloneTemplate(cardPreview), {
+        onClick: () =>
+            events.emit('product:add', i)
+    })
+    
+        modal.render({
+            content: card.render({
+                title: i.title,
+                description: i.description,
+                image: i.image,
+                price: i.price,
+                category: i.category,
+                isInBasket: basketData.hasProduct(i)
+            })
+        })
+
+})
+
+events.on('modal:open', () => {
+    page.locked = true
+})
+
+events.on('modal:close', () => {
+    page.locked = false
+})
+
 events.on<IProduct>('product:add', (i: IProduct) => {
     const basketProducts = basketData.add(i)
     renderBasket(basketProducts)
@@ -132,21 +136,19 @@ events.on('basket:open', () => {
 
 events.on<IProduct>('product:delete', (i: IProduct) => {
     const basketProducts = basketData.remove(i)
-
     renderBasket(basketProducts)
-
 })
 
 events.on('product:checkout', () => {
-     
-        modal.render({
-            content: firstForm.render({
-                address: '',
-                payment: '',
-                errors: [],
-                valid: true
-            })
+   
+    modal.render({
+        content: firstForm.render({
+            address: '',
+            payment: '',
+            errors: [],
+            valid: false
         })
+    })
 })
 
 events.on('form:proceed', () => {
@@ -157,7 +159,7 @@ events.on('form:proceed', () => {
                 email: '',
                 phone: '',
                 errors: [],
-                valid: true
+                valid: false
             })
         })
     }
